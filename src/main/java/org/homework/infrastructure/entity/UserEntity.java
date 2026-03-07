@@ -27,6 +27,13 @@ public class UserEntity {
 
     public UserEntity() {}
 
+    public UserEntity(Long id, String name, String email, Integer age) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.age = age;
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -40,4 +47,5 @@ public class UserEntity {
     public void setAge(Integer age) { this.age = age; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }
