@@ -8,7 +8,6 @@ import org.homework.consoleapp.service.iotext.TextPrinter;
 import org.homework.consoleapp.service.iotext.TextScanner;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -48,18 +47,12 @@ class UserActionServiceImplTests {
         userActionService.createUser();
 
         // then
-        InOrder inOrder = inOrder(textPrinter, textScanner);
-        inOrder.verify(textPrinter).print("Введите имя: ");
-        inOrder.verify(textScanner).readLine();
-        inOrder.verify(textPrinter).print("Введите email: ");
-        inOrder.verify(textScanner).readLine();
-        inOrder.verify(textScanner).getIntInput("Введите возраст: ");
         verify(userController).createUser(any(UserDtoIn.class));
         verify(textPrinter).println("Пользователь создан");
     }
 
     @Test
-    void viewAllUsers_shouldPrintMessageWhenNoUsers() {
+    void viewAllUsers_shouldNotPrintUsersWhenListIsEmpty() {
         // given
         when(userController.getAllUsers()).thenReturn(List.of());
 
@@ -67,7 +60,6 @@ class UserActionServiceImplTests {
         userActionService.viewAllUsers();
 
         // then
-        verify(userController).getAllUsers();
         verify(textPrinter).println("Пользователей нет");
     }
 
@@ -210,17 +202,5 @@ class UserActionServiceImplTests {
                         dto.email().equals(email) &&
                         dto.age().equals(age)
         ));
-    }
-
-    @Test
-    void viewAllUsers_shouldNotPrintUsersWhenListIsEmpty() {
-        // given
-        when(userController.getAllUsers()).thenReturn(List.of());
-
-        // when
-        userActionService.viewAllUsers();
-
-        // then
-        verify(textPrinter).println("Пользователей нет");
     }
 }

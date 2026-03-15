@@ -12,6 +12,15 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserMapperTests {
 
     @Test
+    void toDto_shouldReturnNull() {
+        // when
+        var result = UserMapper.toDto(null);
+
+        // then
+        assertNull(result);
+    }
+
+    @Test
     void toDto_shouldMapAllFieldsFromEntityToDto() {
         // given
         var id = 1L;
@@ -37,6 +46,15 @@ class UserMapperTests {
         assertEquals(email, result.email());
         assertEquals(age, result.age());
         assertEquals(createdAt, result.createdAt());
+    }
+
+    @Test
+    void toEntity_shouldReturnNull() {
+        // when
+        var result = UserMapper.toEntity(null);
+
+        // then
+        assertNull(result);
     }
 
     @Test

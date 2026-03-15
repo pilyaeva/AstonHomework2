@@ -50,7 +50,7 @@ public class UserController {
     }
 
     public boolean deleteUser(Long id) {
-        if (!userRepository.findById(id).isPresent()) {
+        if (userRepository.findById(id).isEmpty()) {
             logger.warn("Пользователь не найден: {}", id);
             return false;
         }

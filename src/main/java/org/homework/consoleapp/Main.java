@@ -9,7 +9,7 @@ import org.homework.infrastructure.repository.UserRepositoryImlp;
 import org.homework.infrastructure.util.HibernateUtil;
 
 import java.util.Scanner;
-
+// кажется можно убрать прямой scanner под интерфейс
 public class Main {
     public static void main(String[] args) {
         var scanner = new Scanner(System.in);
