@@ -2,6 +2,8 @@ package consoleapp.controller;
 
 import org.homework.consoleapp.controller.UserController;
 import org.homework.infrastructure.entity.UserEntity;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.homework.consoleapp.mapper.UserMapper;
 import org.homework.consoleapp.model.UserDtoIn;
@@ -13,7 +15,6 @@ import org.instancio.Select;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -33,231 +34,201 @@ class UserControllerTests {
     @InjectMocks
     private UserController userController;
 
-    @Test
-    void createUser_shouldCallMapperAndRepositoryAndLogInfo() {
-        // given
-        var userDto = new UserDtoIn("Updated Name", "updated@example.com", 30);
-        var userEntity = Instancio.of(UserEntity.class)
-                .set(Select.field(UserEntity::getId), 1L)
-                .create();
+    @Nested
+    @DisplayName("createUser. Создание пользователя")
+    class CreateUserTests {
 
-        // when
-        try (MockedStatic<UserMapper> mapperMock = mockStatic(UserMapper.class)) {
-            mapperMock.when(() -> UserMapper.toEntity(userDto)).thenReturn(userEntity);
+        @Test
+        @DisplayName("Должен вызвать маппер, репозиторий и залогировать информацию")
+        void shouldCallMapperAndRepositoryAndLogInfo() {
+            // given
+            var id = Instancio.create(Long.class);
+            var userDto = new UserDtoIn("Updated Name", "updated@example.com", 30);
+            var userEntity = Instancio.of(UserEntity.class)
+                    .set(Select.field(UserEntity::getId), id)
+                    .create();
 
-            userController.createUser(userDto);
+            // when
+            try (var mapperMock = mockStatic(UserMapper.class)) {
+                mapperMock.when(() -> UserMapper.toEntity(userDto)).thenReturn(userEntity);
 
-            // then
-            mapperMock.verify(() -> UserMapper.toEntity(userDto));
-            verify(userRepository).create(userEntity);
-        }
-    }
+                userController.createUser(userDto);
 
-    @Test
-    void getAllUsers_shouldReturnEmptyListWhenRepositoryReturnsEmpty() {
-        // given
-        when(userRepository.findAll()).thenReturn(List.of());
-
-        // when
-        var result = userController.getAllUsers();
-
-        // then
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-        verify(userRepository).findAll();
-    }
-
-    @Test
-    void getAllUsers_shouldMapEntitiesToDtosWhenUsersExist() {
-        // given
-        var userEntity = Instancio.of(UserEntity.class)
-                .set(Select.field(UserEntity::getId), 1L)
-                .create();
-        var userDto = Instancio.of(UserDtoOut.class)
-                .set(Select.field(UserDtoOut::id), userEntity.getId())
-                .create();
-
-        when(userRepository.findAll()).thenReturn(List.of(userEntity));
-
-        // when
-        try (MockedStatic<UserMapper> mapperMock = mockStatic(UserMapper.class)) {
-            mapperMock.when(() -> UserMapper.toDto(userEntity)).thenReturn(userDto);
-
-            var result = userController.getAllUsers();
-
-            // then
-            mapperMock.verify(() -> UserMapper.toDto(userEntity));
-            assertEquals(1, result.size());
-            assertEquals(userDto, result.get(0));
-        }
-    }
-
-    @Test
-    void updateUser_shouldUpdateExistingUserAndReturnTrue() {
-        // given
-        var id = 1L;
-        var existingUser = Instancio.of(UserEntity.class)
-                .set(Select.field(UserEntity::getId), id)
-                .create();
-        var updateDto = new UserDtoIn("Updated Name", "updated@example.com", 30);
-
-        when(userRepository.findById(id)).thenReturn(Optional.of(existingUser));
-
-        // when
-        var result = userController.updateUser(id, updateDto);
-
-        // then
-        assertTrue(result);
-        assertEquals(updateDto.name(), existingUser.getName());
-        assertEquals(updateDto.email(), existingUser.getEmail());
-        assertEquals(updateDto.age(), existingUser.getAge());
-        verify(userRepository).update(existingUser);
-        verify(userRepository).findById(id);
-    }
-
-    @Test
-    void updateUser_shouldReturnFalseAndLogWarnWhenUserNotFound() {
-        // given
-        var id = Instancio.create(Long.class);
-        var userDto = Instancio.create(UserDtoIn.class);
-
-        when(userRepository.findById(id)).thenReturn(Optional.empty());
-
-        // when
-        var result = userController.updateUser(id, userDto);
-
-        // then
-        assertFalse(result);
-        verify(userRepository).findById(id);
-        verify(userRepository, never()).update(any());
-    }
-
-    @Test
-    void updateUser_shouldNotModifyRepositoryWhenUserNotFound() {
-        // given
-        var id = Instancio.create(Long.class);
-        var userDto = Instancio.create(UserDtoIn.class);
-
-        when(userRepository.findById(id)).thenReturn(Optional.empty());
-
-        // when
-        var result = userController.updateUser(id, userDto);
-
-        // then
-        assertFalse(result);
-        verify(userRepository, never()).update(any());
-    }
-
-    @Test
-    void deleteUser_shouldDeleteExistingUserAndReturnTrue() {
-        // given
-        var id = 2L;
-        var userEntity = Instancio.of(UserEntity.class)
-                .set(Select.field(UserEntity::getId), id)
-                .create();
-
-        when(userRepository.findById(id)).thenReturn(Optional.of(userEntity));
-
-        // when
-        var result = userController.deleteUser(id);
-
-        // then
-        assertTrue(result);
-        verify(userRepository).findById(id);
-        verify(userRepository).delete(id);
-    }
-
-    @Test
-    void deleteUser_shouldReturnFalseAndLogWarnWhenUserNotFound() {
-        // given
-        var id = Instancio.create(Long.class);
-
-        when(userRepository.findById(id)).thenReturn(Optional.empty());
-
-        // when
-        var result = userController.deleteUser(id);
-
-        // then
-        assertFalse(result);
-        verify(userRepository).findById(id);
-        verify(userRepository, never()).delete(id);
-    }
-
-    @Test
-    void deleteUser_shouldNotCallDeleteWhenUserDoesNotExist() {
-        // given
-        var id = Instancio.create(Long.class);
-
-        when(userRepository.findById(id)).thenReturn(Optional.empty());
-
-        // when
-        var result = userController.deleteUser(id);
-
-        // then
-        assertFalse(result);
-        verify(userRepository, never()).delete(anyLong());
-    }
-
-    @Test
-    void getAllUsers_shouldCallMapperForEachEntity() {
-        // given
-        var idGenerator = new AtomicLong(1L);
-        var entities = Instancio.ofList(UserEntity.class)
-                .size(2)
-                .supply(Select.field(UserEntity::getId), idGenerator::getAndIncrement)
-                .create();
-
-        var dtos = entities.stream()
-                .map(e -> Instancio.of(UserDtoOut.class)
-                        .set(Select.field(UserDtoOut::id), e.getId())
-                        .set(Select.field(UserDtoOut::name), e.getName())
-                        .set(Select.field(UserDtoOut::email), e.getEmail())
-                        .set(Select.field(UserDtoOut::age), e.getAge())
-                        .create())
-                .toList();
-
-        when(userRepository.findAll()).thenReturn(entities);
-
-        // when
-        try (MockedStatic<UserMapper> mapperMock = mockStatic(UserMapper.class)) {
-            for (int i = 0; i < entities.size(); i++) {
-                final var entity = entities.get(i);
-                final var dto = dtos.get(i);
-
-                mapperMock.when(() -> UserMapper.toDto(entity)).thenReturn(dto);
-            }
-
-            var result = userController.getAllUsers();
-
-            // then
-            assertEquals(2, result.size());
-            assertTrue(result.containsAll(dtos));
-            for (var entity : entities) {
-                mapperMock.verify(() -> UserMapper.toDto(entity));
+                // then
+                mapperMock.verify(() -> UserMapper.toEntity(userDto));
+                verify(userRepository).create(userEntity);
             }
         }
     }
 
-    @Test
-    void createUser_shouldHandleNullFieldsInDto() {
-        // given
-        var userDto = new UserDtoIn("Updated Name", "updated@example.com", 30);
+    @Nested
+    @DisplayName("getAllUsers. Получение всех пользователей")
+    class GetAllUsersTests {
 
-        var userEntity = Instancio.of(UserEntity.class)
-                .set(Select.field(UserEntity::getName), null)
-                .set(Select.field(UserEntity::getEmail), null)
-                .set(Select.field(UserEntity::getAge), null)
-                .create();
+        @Test
+        @DisplayName("Вернуть пустой список, когда репозиторий возвращает пустой список")
+        void shouldReturnEmptyListWhenRepositoryReturnsEmpty() {
+            // given
+            when(userRepository.findAll()).thenReturn(List.of());
 
-        // when
-        try (MockedStatic<UserMapper> mapperMock = mockStatic(UserMapper.class)) {
-            mapperMock.when(() -> UserMapper.toEntity(userDto)).thenReturn(userEntity);
-
-            userController.createUser(userDto);
+            // when
+            var result = userController.getAllUsers();
 
             // then
-            mapperMock.verify(() -> UserMapper.toEntity(userDto));
-            verify(userRepository).create(userEntity);
+            assertNotNull(result);
+            assertTrue(result.isEmpty());
+            verify(userRepository).findAll();
+        }
+
+        @Test
+        @DisplayName("Сконвертировать сущности в DTO через маппер, когда пользователи есть")
+        void shouldMapEntitiesToDtosWhenUsersExist() {
+            // given
+            var id = Instancio.create(Long.class);
+            var userEntity = Instancio.of(UserEntity.class)
+                    .set(Select.field(UserEntity::getId), id)
+                    .create();
+            var userDto = Instancio.of(UserDtoOut.class)
+                    .set(Select.field(UserDtoOut::id), userEntity.getId())
+                    .create();
+
+            when(userRepository.findAll()).thenReturn(List.of(userEntity));
+
+            // when
+            try (var mapperMock = mockStatic(UserMapper.class)) {
+                mapperMock.when(() -> UserMapper.toDto(userEntity)).thenReturn(userDto);
+
+                var result = userController.getAllUsers();
+
+                // then
+                mapperMock.verify(() -> UserMapper.toDto(userEntity));
+                assertEquals(1, result.size());
+                assertEquals(userDto, result.get(0));
+            }
+        }
+
+        @Test
+        @DisplayName("Вызвать маппер для каждой сущности при множественных пользователях")
+        void shouldCallMapperForEachEntity() {
+            // given
+            var userCount = 2;
+            var idGenerator = new AtomicLong(1L);
+            var entities = Instancio.ofList(UserEntity.class)
+                    .size(userCount)
+                    .supply(Select.field(UserEntity::getId), idGenerator::getAndIncrement)
+                    .create();
+
+            var dtos = entities.stream()
+                    .map(e -> Instancio.of(UserDtoOut.class)
+                            .set(Select.field(UserDtoOut::id), e.getId())
+                            .set(Select.field(UserDtoOut::name), e.getName())
+                            .set(Select.field(UserDtoOut::email), e.getEmail())
+                            .set(Select.field(UserDtoOut::age), e.getAge())
+                            .create())
+                    .toList();
+
+            when(userRepository.findAll()).thenReturn(entities);
+
+            // when
+            try (var mapperMock = mockStatic(UserMapper.class)) {
+                for (int i = 0; i < entities.size(); i++) {
+                    final var entity = entities.get(i);
+                    final var dto = dtos.get(i);
+
+                    mapperMock.when(() -> UserMapper.toDto(entity)).thenReturn(dto);
+                }
+
+                var result = userController.getAllUsers();
+
+                // then
+                assertEquals(userCount, result.size());
+                assertTrue(result.containsAll(dtos));
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("updateUser. Обновление пользователя")
+    class UpdateUserTests {
+
+        @Test
+        @DisplayName("Успешно обновить существующего пользователя и вернуть true")
+        void shouldUpdateExistingUserAndReturnTrue() {
+            // given
+            var id = Instancio.create(Long.class);
+            var existingUser = Instancio.of(UserEntity.class)
+                    .set(Select.field(UserEntity::getId), id)
+                    .create();
+            var updateDto = new UserDtoIn("Updated Name", "updated@example.com", 30);
+
+            when(userRepository.findById(id)).thenReturn(Optional.of(existingUser));
+
+            // when
+            var result = userController.updateUser(id, updateDto);
+
+            // then
+            assertTrue(result);
+            assertEquals(updateDto.name(), existingUser.getName());
+            assertEquals(updateDto.email(), existingUser.getEmail());
+            assertEquals(updateDto.age(), existingUser.getAge());
+            verify(userRepository).update(existingUser);
+        }
+
+        @Test
+        @DisplayName("Вернуть false и залогировать предупреждение, когда пользователь не найден")
+        void shouldReturnFalseAndLogWarnWhenUserNotFound() {
+            // given
+            var id = Instancio.create(Long.class);
+            UserDtoIn userDto = null;
+
+            when(userRepository.findById(id)).thenReturn(Optional.empty());
+
+            // when
+            var result = userController.updateUser(id, userDto);
+
+            // then
+            assertFalse(result);
+            verify(userRepository, never()).update(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("deleteUser. Удаление пользователя")
+    class DeleteUserTests {
+
+        @Test
+        @DisplayName("Удалить существующего пользователя и вернуть true")
+        void shouldDeleteExistingUserAndReturnTrue() {
+            // given
+            var id = Instancio.create(Long.class);
+            var userEntity = Instancio.of(UserEntity.class)
+                    .set(Select.field(UserEntity::getId), id)
+                    .create();
+
+            when(userRepository.findById(id)).thenReturn(Optional.of(userEntity));
+
+            // when
+            var result = userController.deleteUser(id);
+
+            // then
+            assertTrue(result);
+            verify(userRepository).delete(id);
+        }
+
+        @Test
+        @DisplayName("Вернуть false и залогировать предупреждение, когда пользователь не найден")
+        void shouldReturnFalseAndLogWarnWhenUserNotFound() {
+            // given
+            var id = Instancio.create(Long.class);
+
+            when(userRepository.findById(id)).thenReturn(Optional.empty());
+
+            // when
+            var result = userController.deleteUser(id);
+
+            // then
+            assertFalse(result);
+            verify(userRepository, never()).delete(id);
         }
     }
 }

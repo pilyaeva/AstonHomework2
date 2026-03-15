@@ -1,20 +1,30 @@
 package org.homework.infrastructure.repository;
 
 import org.hibernate.Session;
+import org.hibernate.SessionFactory; // ← добавляем импорт
 import org.hibernate.Transaction;
 import org.hibernate.exception.ConstraintViolationException;
 import org.homework.infrastructure.entity.UserEntity;
 import org.homework.infrastructure.exception.InfrastructureException;
-import org.homework.infrastructure.util.HibernateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
 
-public class UserRepositoryImlp implements UserRepository {
+public class UserRepositoryImpl implements UserRepository {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserRepositoryImlp.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserRepositoryImpl.class);
+
+    private final SessionFactory sessionFactory;
+
+    public UserRepositoryImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
+    private Session openSession() {
+        return sessionFactory.openSession();
+    }
 
     @Override
     public void create(UserEntity user) {
@@ -22,7 +32,7 @@ public class UserRepositoryImlp implements UserRepository {
         Transaction transaction = null;
 
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            session = openSession();
             transaction = session.beginTransaction();
             session.persist(user);
             transaction.commit();
@@ -50,7 +60,7 @@ public class UserRepositoryImlp implements UserRepository {
 
     @Override
     public Optional<UserEntity> findById(Long id) {
-        try (var session = HibernateUtil.getSessionFactory().openSession()) {
+        try (var session = openSession()) {
             var user = session.get(UserEntity.class, id);
             if (user != null) {
                 logger.debug("Пользователь найден: {}", id);
@@ -64,7 +74,7 @@ public class UserRepositoryImlp implements UserRepository {
 
     @Override
     public List<UserEntity> findAll() {
-        try (var session = HibernateUtil.getSessionFactory().openSession()) {
+        try (var session = openSession()) {
             return session.createQuery("FROM org.homework.infrastructure.entity.UserEntity", UserEntity.class).list();
         } catch (Exception e) {
             logger.error("Ошибка поиска всех пользователей", e);
@@ -78,11 +88,9 @@ public class UserRepositoryImlp implements UserRepository {
         Transaction transaction = null;
 
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            session = openSession();
             transaction = session.beginTransaction();
-
             session.merge(user);
-
             transaction.commit();
             logger.info("Пользователь обновлён: {}", user.getId());
         } catch (Exception e) {
@@ -108,7 +116,7 @@ public class UserRepositoryImlp implements UserRepository {
         Transaction transaction = null;
 
         try {
-            session = HibernateUtil.getSessionFactory().openSession();
+            session = openSession();
             transaction = session.beginTransaction();
 
             var user = session.get(UserEntity.class, id);
