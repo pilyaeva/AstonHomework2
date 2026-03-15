@@ -7,21 +7,16 @@ import org.homework.infrastructure.exception.InfrastructureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Scanner;
-
 public class CrudUserMenuService {
     private static final Logger logger = LoggerFactory.getLogger(CrudUserMenuService.class);
 
-    private final Scanner scanner;
     private final TextPrinter textPrinter;
     private final TextScanner textScanner;
     private final UserActionService userActionService;
 
-    public CrudUserMenuService(Scanner scanner,
-                               TextPrinter textPrinter,
+    public CrudUserMenuService(TextPrinter textPrinter,
                                TextScanner textScanner,
                                UserActionService userActionService) {
-        this.scanner = scanner;
         this.textPrinter = textPrinter;
         this.textScanner = textScanner;
         this.userActionService = userActionService;

@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Optional;
 
-public class UserRepositoryImlp implements UserRepository {
+public class UserRepositoryImpl implements UserRepository {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserRepositoryImlp.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserRepositoryImpl.class);
 
     @Override
     public void create(UserEntity user) {
