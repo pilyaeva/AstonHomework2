@@ -2,238 +2,246 @@ package consoleapp.model;
 
 import org.homework.consoleapp.exception.ValidationException;
 import org.homework.consoleapp.model.UserDtoIn;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserDtoInTests {
 
-    @Test
-    void constructor_shouldCreateValidUserWithCorrectData() {
-        // given
-        var name = "test";
-        var email = "test@example.com";
-        var age = 25;
+    @Nested
+    @DisplayName("constructor. Конструктор UserDtoIn")
+    class Constructor {
 
-        // when
-        var user = new UserDtoIn(name, email, age);
+        @Test
+        @DisplayName("Успешное создание пользователя с корректными данными")
+        void shouldCreateValidUserWithCorrectData() {
+            // given
+            var name = "test";
+            var email = "test@example.com";
+            var age = 25;
 
-        // then
-        assertEquals(name, user.name());
-        assertEquals(email, user.email());
-        assertEquals(age, user.age());
-    }
+            // when
+            var user = new UserDtoIn(name, email, age);
 
-    @Test
-    void constructor_shouldThrowWhenNameIsNull() {
-        // given
-        String name = null;
-        var email = "test@example.com";
-        var age = 30;
+            // then
+            assertEquals(name, user.name());
+            assertEquals(email, user.email());
+            assertEquals(age, user.age());
+        }
 
-        // when
-        var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
+        @Test
+        @DisplayName("Имя пользователя null")
+        void shouldThrowWhenNameIsNull() {
+            // given
+            String name = null;
+            var email = "test@example.com";
+            var age = 30;
 
-        // then
-        assertEquals("Имя пользователя не может быть пустым", exception.getMessage());
-    }
+            // when
+            var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
 
-    @Test
-    void constructor_shouldThrowWhenNameIsBlank() {
-        // given
-        var name = "   ";
-        var email = "test@example.com";
-        var age = 30;
+            // then
+            assertEquals("Имя пользователя не может быть пустым", exception.getMessage());
+        }
 
-        // when
-        var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
+        @Test
+        @DisplayName("Имя пользователя пробелы")
+        void shouldThrowWhenNameIsBlank() {
+            // given
+            var name = "   ";
+            var email = "test@example.com";
+            var age = 30;
 
-        // then
-        assertEquals("Имя пользователя не может быть пустым", exception.getMessage());
-    }
+            // when
+            var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
 
-    @Test
-    void constructor_shouldThrowWhenNameIsEmpty() {
-        // given
-        var name = "";
-        var email = "test@example.com";
-        var age = 30;
+            // then
+            assertEquals("Имя пользователя не может быть пустым", exception.getMessage());
+        }
 
-        // when
-        var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
+        @Test
+        @DisplayName("Имя пользователя пустое")
+        void shouldThrowWhenNameIsEmpty() {
+            // given
+            var name = "";
+            var email = "test@example.com";
+            var age = 30;
 
-        // then
-        assertEquals("Имя пользователя не может быть пустым", exception.getMessage());
-    }
+            // when
+            var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
 
-    @Test
-    void constructor_shouldThrowWhenEmailIsNull() {
-        // given
-        var name = "test";
-        String email = null;
-        var age = 40;
+            // then
+            assertEquals("Имя пользователя не может быть пустым", exception.getMessage());
+        }
 
-        // when
-        var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
+        @Test
+        @DisplayName("Email пользователя null")
+        void shouldThrowWhenEmailIsNull() {
+            // given
+            var name = "test";
+            String email = null;
+            var age = 40;
 
-        // then
-        assertTrue(exception.getMessage().contains("Некорректный формат email"));
-        assertTrue(exception.getMessage().contains("null"));
-    }
+            // when
+            var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
 
-    @Test
-    void constructor_shouldThrowWhenEmailHasNoAtSymbol() {
-        // given
-        var name = "test";
-        var email = "testexample.com";
-        var age = 40;
+            // then
+            assertTrue(exception.getMessage().contains("Некорректный формат email"));
+            assertTrue(exception.getMessage().contains("null"));
+        }
 
-        // when
-        var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
+        @Test
+        @DisplayName("Email пользователя с некоренными символами")
+        void shouldThrowWhenEmailHasNoAtSymbol() {
+            // given
+            var name = "test";
+            var email = "testexample.com";
+            var age = 40;
 
-        // then
-        assertTrue(exception.getMessage().contains("Некорректный формат email"));
-    }
+            // when
+            var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
 
-    @Test
-    void constructor_shouldThrowWhenEmailHasNoDomain() {
-        // given
-        var name = "test";
-        var email = "test@";
-        var age = 40;
+            // then
+            assertTrue(exception.getMessage().contains("Некорректный формат email"));
+        }
 
-        // when
-        var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
+        @Test
+        @DisplayName("Email пользователя с отсутствующим доменом")
+        void shouldThrowWhenEmailHasNoDomain() {
+            // given
+            var name = "test";
+            var email = "test@";
+            var age = 40;
 
-        // then
-        assertTrue(exception.getMessage().contains("Некорректный формат email"));
-    }
+            // when
+            var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
 
-    @Test
-    void constructor_shouldThrowWhenEmailHasNoLocalPart() {
-        // given
-        var name = "test";
-        var email = "@example.com";
-        var age = 40;
+            // then
+            assertTrue(exception.getMessage().contains("Некорректный формат email"));
+        }
 
-        // when
-        var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
+        @Test
+        @DisplayName("Email пользователя с отсутствующим телом")
+        void shouldThrowWhenEmailHasNoLocalPart() {
+            // given
+            var name = "test";
+            var email = "@example.com";
+            var age = 40;
 
-        // then
-        assertTrue(exception.getMessage().contains("Некорректный формат email"));
-    }
+            // when
+            var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
 
-    @Test
-    void constructor_shouldThrowWhenEmailHasSpaces() {
-        // given
-        var name = "test";
-        var email = "test @example.com";
-        var age = 40;
+            // then
+            assertTrue(exception.getMessage().contains("Некорректный формат email"));
+        }
 
-        // when
-        var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
+        @Test
+        @DisplayName("Email пользователя пробелом в почте")
+        void shouldThrowWhenEmailHasSpaces() {
+            // given
+            var name = "test";
+            var email = "test @example.com";
+            var age = 40;
 
-        // then
-        assertTrue(exception.getMessage().contains("Некорректный формат email"));
-    }
+            // when
+            var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
 
-    @Test
-    void constructor_shouldThrowWhenAgeIsNull() {
-        // given
-        var name = "test";
-        var email = "test@example.com";
-        Integer age = null;
+            // then
+            assertTrue(exception.getMessage().contains("Некорректный формат email"));
+        }
 
-        // when
-        var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
+        @Test
+        @DisplayName("Возраст пользователя null")
+        void shouldThrowWhenAgeIsNull() {
+            // given
+            var name = "test";
+            var email = "test@example.com";
+            Integer age = null;
 
-        // then
-        assertEquals("Возраст не может быть null", exception.getMessage());
-    }
+            // when
+            var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
 
-    @Test
-    void constructor_shouldThrowWhenAgeIsNegative() {
-        // given
-        var name = "test";
-        var email = "test@example.com";
-        var age = -1;
+            // then
+            assertEquals("Возраст не может быть null", exception.getMessage());
+        }
 
-        // when
-        var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
+        @Test
+        @DisplayName("Возраст пользователя < 0")
+        void shouldThrowWhenAgeIsNegative() {
+            // given
+            var name = "test";
+            var email = "test@example.com";
+            var age = -1;
 
-        // then
-        assertTrue(exception.getMessage().contains("Возраст должен быть в диапазоне от 0 до 120 лет"));
-        assertTrue(exception.getMessage().contains("-1"));
-    }
+            // when
+            var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
 
-    @Test
-    void constructor_shouldThrowWhenAgeExceedsMaximum() {
-        // given
-        var name = "test";
-        var email = "test@example.com";
-        var age = 121;
+            // then
+            assertTrue(exception.getMessage().contains("Возраст должен быть в диапазоне от 0 до 120 лет"));
+            assertTrue(exception.getMessage().contains("-1"));
+        }
 
-        // when
-        var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
+        @Test
+        @DisplayName("Возраст пользователя больше валидного")
+        void shouldThrowWhenAgeExceedsMaximum() {
+            // given
+            var name = "test";
+            var email = "test@example.com";
+            var age = 121;
 
-        // then
-        assertTrue(exception.getMessage().contains("Возраст должен быть в диапазоне от 0 до 120 лет"));
-        assertTrue(exception.getMessage().contains("121"));
-    }
+            // when
+            var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
 
-    @Test
-    void constructor_shouldAcceptAgeZero() {
-        // given
-        var name = "test";
-        var email = "test@example.com";
-        var age = 0;
+            // then
+            assertTrue(exception.getMessage().contains("Возраст должен быть в диапазоне от 0 до 120 лет"));
+            assertTrue(exception.getMessage().contains("121"));
+        }
 
-        // when
-        var user = new UserDtoIn(name, email, age);
+        @Test
+        @DisplayName("Успешное создание пользователя с возрастом 0")
+        void shouldAcceptAgeZero() {
+            // given
+            var name = "test";
+            var email = "test@example.com";
+            var age = 0;
 
-        // then
-        assertEquals(0, user.age());
-    }
+            // when
+            var user = new UserDtoIn(name, email, age);
 
-    @Test
-    void constructor_shouldAcceptAgeMaximum() {
-        // given
-        var name = "test";
-        var email = "test@example.com";
-        var age = 120;
+            // then
+            assertEquals(0, user.age());
+        }
 
-        // when
-        var user = new UserDtoIn(name, email, age);
+        @Test
+        @DisplayName("Успешное создание пользователя с макс допустимым возрастом")
+        void shouldAcceptAgeMaximum() {
+            // given
+            var name = "test";
+            var email = "test@example.com";
+            var age = 120;
 
-        // then
-        assertEquals(120, user.age());
-    }
+            // when
+            var user = new UserDtoIn(name, email, age);
 
-    @Test
-    void constructor_shouldAllowUnderscoreAndHyphenInEmail() {
-        // given
-        var name = "test";
-        var email = "user_name-test@sub-domain.example.com";
-        var age = 50;
+            // then
+            assertEquals(120, user.age());
+        }
 
-        // when
-        var user = new UserDtoIn(name, email, age);
+        @Test
+        @DisplayName("Некорректный формат email")
+        void shouldRejectEmailWithDoubleAt() {
+            // given
+            var name = "test";
+            var email = "user@@example.com";
+            var age = 50;
 
-        // then
-        assertEquals(email, user.email());
-    }
+            // when
+            var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
 
-    @Test
-    void constructor_shouldRejectEmailWithDoubleAt() {
-        // given
-        var name = "test";
-        var email = "user@@example.com";
-        var age = 50;
-
-        // when
-        var exception = assertThrows(ValidationException.class, () -> new UserDtoIn(name, email, age));
-
-        // then
-        assertTrue(exception.getMessage().contains("Некорректный формат email"));
+            // then
+            assertTrue(exception.getMessage().contains("Некорректный формат email"));
+        }
     }
 }

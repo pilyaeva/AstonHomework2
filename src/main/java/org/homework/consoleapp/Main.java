@@ -15,7 +15,7 @@ public class Main {
         var scanner = new Scanner(System.in);
         var textPrinter = new ConsoleTextPrinter();
         var textScanner = new ConsoleTextScanner(scanner, textPrinter);
-        var userRepository = new UserRepositoryImpl();
+        var userRepository = new UserRepositoryImpl(HibernateUtil.getSessionFactory());
         var userController = new UserController(userRepository);
         var userActionService = new UserActionServiceImpl(userController, textPrinter, textScanner);
 
